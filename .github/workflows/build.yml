@@ -7,11 +7,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: unzip KidGuard.zip
-      - name: Add nudity model
+      - name: Unpack the project zip
         run: |
-          mkdir -p KidGuard/app/src/main/assets
-          cp nsfw.tflite KidGuard/app/src/main/assets/nsfw.tflite
+          if [ ! -f KidGuard-updated.zip ]; then
+            echo "ERROR: KidGuard-updated.zip is not in the repo. Files found:"
+            ls -la
+            exit 1
+          fi
+          mkdir -p project
+          unzip -oq KidGuard-updated.zip -d project || [ $? -eq 1 ]
+          echo "Unpacked:"
+          ls -la project
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -19,9 +25,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.7
-      - run: gradle assembleDebug --no-daemon
-        working-directory: KidGuard
+      - name: Build debug APK
+        working-directory: project
+        run: gradle assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
           name: KidGuard-apk
-          path: KidGuard/app/build/outputs/apk/debug/app-debug.apk
+          path: project/app/build/outputs/apk/debug/app-debug.apk
