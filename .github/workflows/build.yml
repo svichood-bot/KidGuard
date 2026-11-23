@@ -8,6 +8,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: unzip KidGuard.zip
+      - name: Add nudity model
+        run: |
+          mkdir -p KidGuard/app/src/main/assets
+          cp nsfw.tflite KidGuard/app/src/main/assets/nsfw.tflite
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
